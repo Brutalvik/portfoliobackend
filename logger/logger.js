@@ -6,6 +6,7 @@ const logger = (req, res, next) => {
       req.originalUrl
     } : Time --> ${moment().format()}`
   );
+  console.log();
   next();
 };
 
