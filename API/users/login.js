@@ -2,12 +2,18 @@ const express = require("express");
 const login = express.Router();
 const users = require("../../db/users");
 const bcrypt = require("bcrypt");
-const { ObjectId } = require("mongodb");
-const SALT = 10;
+const axios = require("axios");
 
 login.post("/login", async (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  const token = req.body.token;
+
+  const tokenURL = process.env.GOOGLE_CAPTCHA_URI;
+  const key = process.env.GOOGLE_CATPCHA_KEY;
+
+  const URL = `${tokenURL}${key}&response=${token}`;
+  const { data } = await axios.post(URL);
 
   if (!email || email === "") {
     return res.status(400).send({
@@ -23,6 +29,21 @@ login.post("/login", async (req, res) => {
     });
   }
 
+  try {
+    if (!data.success) {
+      return res.status(400).send({
+        isRegistered: false,
+        message: `Captcha verification failed`,
+        data: data,
+      });
+    }
+  } catch (error) {
+    res.status(400).send({
+      isRegistered: false,
+      message: error,
+    });
+  }
+
   const usersCollection = await users();
   const response = await usersCollection.findOne({ email });
   if (!response) {
@@ -31,6 +52,7 @@ login.post("/login", async (req, res) => {
       message: `No user with email ${email} exists`,
     });
   }
+
   bcrypt.compare(password, response.password, async (error, result) => {
     if (error) {
       return res.status(400).send({
@@ -66,6 +88,7 @@ login.post("/login", async (req, res) => {
         lastName: response.lastName,
         isLoggedin: updateResponse.acknowledged,
         id: response._id,
+        data: data,
       },
     });
   });

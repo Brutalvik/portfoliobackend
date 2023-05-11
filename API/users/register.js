@@ -59,7 +59,7 @@ register.post("/register", async (req, res) => {
   } catch (error) {
     res.status(400).send({
       isRegistered: false,
-      message: `User with email ${email} already exsits`,
+      message: error,
     });
   }
 
