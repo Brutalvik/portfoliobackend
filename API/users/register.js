@@ -4,6 +4,7 @@ const users = require("../../db/users");
 const bcrypt = require("bcrypt");
 const { ObjectId } = require("mongodb");
 const SALT = 10;
+const axios = require("axios");
 
 //Register User
 register.post("/register", async (req, res) => {
@@ -11,6 +12,13 @@ register.post("/register", async (req, res) => {
   const password = req.body.password;
   const firstName = req.body.firstName;
   const lastName = req.body.lastName;
+  const token = req.body.token;
+
+  const tokenURL = process.env.GOOGLE_CAPTCHA_URI;
+  const key = process.env.GOOGLE_CATPCHA_KEY;
+
+  const URL = `${tokenURL}${key}&response=${token}`;
+  const { data } = await axios.post(URL);
 
   if (!email || email === "") {
     return res.status(400).send({
@@ -40,6 +48,21 @@ register.post("/register", async (req, res) => {
     });
   }
 
+  try {
+    if (!data.success) {
+      return res.status(400).send({
+        isRegistered: false,
+        message: `Captcha verification failed`,
+        data: data,
+      });
+    }
+  } catch (error) {
+    res.status(400).send({
+      isRegistered: false,
+      message: `User with email ${email} already exsits`,
+    });
+  }
+
   const usersCollection = await users();
   const response = await usersCollection.findOne({ email });
 
@@ -60,6 +83,7 @@ register.post("/register", async (req, res) => {
         isRegistered: true,
         isLoggedIn: false,
         active: true,
+        captchaVerified: true,
       });
 
       if (!insertUser) {
@@ -72,6 +96,7 @@ register.post("/register", async (req, res) => {
       res.status(200).send({
         isRegistered: true,
         message: `User with email ${email} registered successfully!`,
+        captchaResponse: data,
       });
     } catch (err) {
       res.status(400).send({
