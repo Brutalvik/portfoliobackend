@@ -29,20 +29,20 @@ login.post("/login", async (req, res) => {
     });
   }
 
-  try {
-    if (!data.success) {
-      return res.status(400).send({
-        isRegistered: false,
-        message: `Captcha verification failed`,
-        data: data,
-      });
-    }
-  } catch (error) {
-    res.status(400).send({
-      isRegistered: false,
-      message: error,
-    });
-  }
+  // try {
+  //   if (!data.success) {
+  //     return res.status(400).send({
+  //       isLoggedin: false,
+  //       message: `Captcha verification failed`,
+  //       data: data,
+  //     });
+  //   }
+  // } catch (error) {
+  //   res.status(400).send({
+  //     isLoggedin: false,
+  //     message: error,
+  //   });
+  // }
 
   const usersCollection = await users();
   const response = await usersCollection.findOne({ email });

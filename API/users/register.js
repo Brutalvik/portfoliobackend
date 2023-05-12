@@ -18,6 +18,7 @@ register.post("/register", async (req, res) => {
   const key = process.env.GOOGLE_CATPCHA_KEY;
 
   const URL = `${tokenURL}${key}&response=${token}`;
+
   const { data } = await axios.post(URL);
 
   if (!email || email === "") {
@@ -48,20 +49,20 @@ register.post("/register", async (req, res) => {
     });
   }
 
-  try {
-    if (!data.success) {
-      return res.status(400).send({
-        isRegistered: false,
-        message: `Captcha verification failed`,
-        data: data,
-      });
-    }
-  } catch (error) {
-    res.status(400).send({
-      isRegistered: false,
-      message: error,
-    });
-  }
+  // try {
+  //   if (!data.success) {
+  //     return res.status(400).send({
+  //       isRegistered: false,
+  //       message: `Captcha verification failed`,
+  //       data: data,
+  //     });
+  //   }
+  // } catch (error) {
+  //   res.status(400).send({
+  //     isRegistered: false,
+  //     message: error,
+  //   });
+  // }
 
   const usersCollection = await users();
   const response = await usersCollection.findOne({ email });

@@ -1,15 +1,8 @@
+// const functions = require("firebase-functions");
 const express = require("express");
 const app = express();
 const logger = require("./logger/logger");
 const cors = require("cors");
-
-// enable CORS
-// app.use((req, res, next) => {
-//   res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-//   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-//   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-//   next();
-// });
 
 app.use(cors());
 
@@ -20,18 +13,27 @@ app.use(express.urlencoded({ extended: false }));
 //Logger
 app.use(logger);
 
+//Start Server Verification
+app.get("/", (req, res) => {
+  res
+    .status(200)
+    .send("<h1>Portfolio backend server started successfully !</h1>");
+});
+
 //User Registration
-app.use("/api/users", require("./API/users/register"));
+app.use("/users", require("./API/users/register"));
 
 //User Login
-app.use("/api/users", require("./API/users/login"));
+app.use("/users", require("./API/users/login"));
 
 //Upload File
-app.use("/api/files", require("./API/files/fileUpload"));
+app.use("/files", require("./API/files/fileUpload"));
 
 //Download File
-app.use("/api/files", require("./API/files/fileDownload"));
+app.use("/files", require("./API/files/fileDownload"));
 
-//Listen
+// //Listen
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+app.listen(PORT);
+
+// exports.api = functions.https.onRequest(app);
